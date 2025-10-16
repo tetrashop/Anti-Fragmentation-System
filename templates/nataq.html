@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}نطق مصطلح - سامانه ضد چندپارگی{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="text-success mb-4">پردازشگر نطق مصطلح</h2>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5>ورودی متن</h5>
+            </div>
+            <div class="card-body">
+                <form id="nataq-form">
+                    <div class="mb-3">
+                        <label for="text-input" class="form-label">متن خود را وارد کنید:</label>
+                        <textarea class="form-control" id="text-input" rows="8" 
+                                  placeholder="متن فارسی خود را اینجا وارد کنید..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">
+                        پردازش متن
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5>نتایج پردازش</h5>
+            </div>
+            <div class="card-body">
+                <div id="results" class="d-none">
+                    <h6>متن پردازش شده:</h6>
+                    <p id="processed-text" class="bg-light p-3 rounded"></p>
+                    
+                    <h6>تحلیل تلفظ:</h6>
+                    <ul id="analysis-results" class="list-group"></ul>
+                </div>
+                
+                <div id="loading" class="text-center d-none">
+                    <div class="spinner-border text-success" role="status">
+                        <span class="visually-hidden">در حال پردازش...</span>
+                    </div>
+                    <p class="mt-2">در حال پردازش متن...</p>
+                </div>
+                
+                <div id="error" class="alert alert-danger d-none"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('nataq-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const textInput = document.getElementById('text-input').value;
+    const resultsDiv = document.getElementById('results');
+    const loadingDiv = document.getElementById('loading');
+    const errorDiv = document.getElementById('error');
+    
+    // پنهان کردن نتایج قبلی و خطا
+    resultsDiv.classList.add('d-none');
+    errorDiv.classList.add('d-none');
+    
+    // نمایش loading
+    loadingDiv.classList.remove('d-none');
+    
+    // ارسال درخواست
+    fetch('/nataq', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'text=' + encodeURIComponent(textInput)
+    })
+    .then(response => response.json())
+    .then(data => {
+        loadingDiv.classList.add('d-none');
+        
+        if (data.success) {
+            // نمایش نتایج
+            document.getElementById('processed-text').textContent = data.processed_text;
+            
+            const analysisList = document.getElementById('analysis-results');
+            analysisList.innerHTML = '';
+            
+            for (const [key, value] of Object.entries(data.analysis)) {
+                const listItem = document.createElement('li');
+                listItem.className = 'list-group-item d-flex justify-content-between align-items-center';
+                listItem.innerHTML = `
+                    <span>${key}:</span>
+                    <span class="badge bg-primary rounded-pill">${value}</span>
+                `;
+                analysisList.appendChild(listItem);
+            }
+            
+            resultsDiv.classList.remove('d-none');
+        } else {
+            errorDiv.textContent = data.error || 'خطا در پردازش';
+            errorDiv.classList.remove('d-none');
+        }
+    })
+    .catch(error => {
+        loadingDiv.classList.add('d-none');
+        errorDiv.textContent = 'خطا در ارتباط با سرور';
+        errorDiv.classList.remove('d-none');
+    });
+});
+</script>
+{% endblock %}
