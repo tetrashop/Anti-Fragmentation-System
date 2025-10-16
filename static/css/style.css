@@ -1,0 +1,180 @@
+/* استایل‌های سفارشی برای سامانه ضد چندپارگی */
+
+/* تنظیمات پایه */
+body {
+    font-family: 'Vazir', 'Tanha', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.8;
+    background-color: #f8f9fa;
+}
+
+/* هدر و نویگیشن */
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.3rem;
+}
+
+.navbar-nav .nav-link {
+    font-size: 1.1rem;
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+    transition: color 0.3s ease;
+}
+
+.navbar-nav .nav-link:hover {
+    color: #cce7ff !important;
+}
+
+/* کارت‌ها */
+.card {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: none;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    margin-bottom: 1.5rem;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+    font-weight: bold;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+}
+
+/* دکمه‌ها */
+.btn {
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* فرم‌ها */
+.form-control {
+    border-radius: 0.5rem;
+    border: 2px solid #e9ecef;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* لیست‌ها */
+.list-group-item {
+    border: none;
+    border-bottom: 1px solid #e9ecef;
+    padding: 1rem 1.25rem;
+    font-size: 1rem;
+}
+
+.list-group-item:last-child {
+    border-bottom: none;
+}
+
+/* نوار پیشرفت */
+.progress {
+    height: 1.5rem;
+    border-radius: 0.75rem;
+    background-color: #e9ecef;
+    overflow: hidden;
+}
+
+.progress-bar {
+    border-radius: 0.75rem;
+    transition: width 0.6s ease;
+    font-weight: 600;
+}
+
+/* آلرت‌ها */
+.alert {
+    border-radius: 0.75rem;
+    border: none;
+    padding: 1rem 1.5rem;
+    font-weight: 500;
+}
+
+/* فوتور */
+footer {
+    margin-top: auto;
+}
+
+/* انیمیشن‌ها */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.6s ease-out;
+}
+
+/* اسپینر سفارشی */
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+/* responsive adjustments */
+@media (max-width: 768px) {
+    .display-4 {
+        font-size: 2rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .btn {
+        padding: 0.6rem 1.2rem;
+    }
+}
+
+/* استایل‌های مخصوص متن فارسی */
+.persian-text {
+    text-align: justify;
+    word-spacing: -0.1em;
+}
+
+/* استایل برای نمایش نتایج */
+#processed-text, #optimized-text {
+    font-size: 1.1rem;
+    line-height: 2;
+    text-align: justify;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-right: 4px solid #007bff;
+}
+
+/* استایل برای بدج‌ها */
+.badge {
+    font-size: 0.85rem;
+    padding: 0.5em 0.75em;
+}
+
+/* استایل برای کارت‌های وضعیت */
+.status-card {
+    border-left: 4px solid #28a745;
+}
+
+.status-card.warning {
+    border-left-color: #ffc107;
+}
+
+.status-card.danger {
+    border-left-color: #dc3545;
+}
