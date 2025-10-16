@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}خانه - سامانه ضد چندپارگی{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 text-center mb-5">
+        <h1 class="display-4 text-primary">به سامانه ضد چندپارگی خوش آمدید</h1>
+        <p class="lead">سامانه پیشرفته پردازش زبان فارسی با قابلیت‌های متنوع</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <h5 class="card-title text-success">نطق مصطلح</h5>
+                <p class="card-text">پردازش و بهینه‌سازی تلفظ و گویش متن فارسی</p>
+                <a href="{{ url_for('nataq_page') }}" class="btn btn-success">ورود به بخش</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <h5 class="card-title text-info">میزان‌رو</h5>
+                <p class="card-text">تحلیل و سنجش کیفیت متن با معیارهای پیشرفته</p>
+                <a href="{{ url_for('mizanro_page') }}" class="btn btn-info">ورود به بخش</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <h5 class="card-title text-warning">ضد چندپارگی</h5>
+                <p class="card-text">کاهش چندپارگی و یکپارچه‌سازی متن</p>
+                <a href="{{ url_for('anti_fragmentation_page') }}" class="btn btn-warning">ورود به بخش</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4>وضعیت سامانه</h4>
+            </div>
+            <div class="card-body">
+                <div id="system-status">
+                    <p>در حال بررسی وضعیت...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// بررسی وضعیت سامانه
+fetch('/api/health')
+    .then(response => response.json())
+    .then(data => {
+        const statusDiv = document.getElementById('system-status');
+        const statusText = data.modules_loaded ? 'فعال' : 'مشکل در بارگذاری ماژول‌ها';
+        const statusClass = data.modules_loaded ? 'text-success' : 'text-danger';
+        
+        statusDiv.innerHTML = `
+            <p><strong>وضعیت:</strong> <span class="${statusClass}">${statusText}</span></p>
+            <p><strong>ماژول‌ها:</strong> ${data.modules_loaded ? 'بارگذاری شده' : 'بارگذاری نشده'}</p>
+            <p><strong>سامانه:</strong> ${data.system}</p>
+        `;
+    })
+    .catch(error => {
+        document.getElementById('system-status').innerHTML = 
+            '<p class="text-danger">خطا در بررسی وضعیت سامانه</p>';
+    });
+</script>
+{% endblock %}
