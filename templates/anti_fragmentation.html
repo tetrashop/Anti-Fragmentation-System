@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}ضد چندپارگی - سامانه ضد چندپارگی{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="text-warning mb-4">سامانه ضد چندپارگی</h2>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-warning text-dark">
+                <h5>ورودی متن</h5>
+            </div>
+            <div class="card-body">
+                <form id="anti-frag-form">
+                    <div class="mb-3">
+                        <label for="anti-frag-input" class="form-label">متن دارای چندپارگی:</label>
+                        <textarea class="form-control" id="anti-frag-input" rows="8" 
+                                  placeholder="متن فارسی با چندپارگی را وارد کنید..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-warning w-100">
+                        کاهش چندپارگی
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-warning text-dark">
+                <h5>نتایج پردازش</h5>
+            </div>
+            <div class="card-body">
+                <div id="anti-frag-results" class="d-none">
+                    <h6>متن بهینه شده:</h6>
+                    <p id="optimized-text" class="bg-light p-3 rounded"></p>
+                    
+                    <h6>مقایسه امتیاز چندپارگی:</h6>
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 id="score-before" class="text-danger">0</h5>
+                                    <small>قبل از پردازش</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 id="score-after" class="text-success">0</h5>
+                                    <small>بعد از پردازش</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-success mt-3">
+                        <strong>درصد بهبود:</strong> 
+                        <span id="improvement-percent">0</span>%
+                    </div>
+                </div>
+                
+                <div id="anti-frag-loading" class="text-center d-none">
+                    <div class="spinner-border text-warning" role="status">
+                        <span class="visually-hidden">در حال پردازش...</span>
+                    </div>
+                    <p class="mt-2">در حال کاهش چندپارگی...</p>
+                </div>
+                
+                <div id="anti-frag-error" class="alert alert-danger d-none"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('anti-frag-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const textInput = document.getElementById('anti-frag-input').value;
+    const resultsDiv = document.getElementById('anti-frag-results');
+    const loadingDiv = document.getElementById('anti-frag-loading');
+    const errorDiv = document.getElementById('anti-frag-error');
+    
+    // پنهان کردن نتایج قبلی و خطا
+    resultsDiv.classList.add('d-none');
+    errorDiv.classList.add('d-none');
+    
+    // نمایش loading
+    loadingDiv.classList.remove('d-none');
+    
+    // ارسال درخواست
+    fetch('/anti-fragmentation', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'text=' + encodeURIComponent(textInput)
+    })
+    .then(response => response.json())
+    .then(data => {
+        loadingDiv.classList.add('d-none');
+        
+        if (data.success) {
+            // نمایش نتایج
+            document.getElementById('optimized-text').textContent = data.processed_text;
+            document.getElementById('score-before').textContent = data.fragmentation_score_before;
+            document.getElementById('score-after').textContent = data.fragmentation_score_after;
+            document.getElementById('improvement-percent').textContent = data.improvement_percentage;
+            
+            resultsDiv.classList.remove('d-none');
+        } else {
+            errorDiv.textContent = data.error || 'خطا در پردازش';
+            errorDiv.classList.remove('d-none');
+        }
+    })
+    .catch(error => {
+        loadingDiv.classList.add('d-none');
+        errorDiv.textContent = 'خطا در ارتباط با سرور';
+        errorDiv.classList.remove('d-none');
+    });
+});
+</script>
+{% endblock %}
