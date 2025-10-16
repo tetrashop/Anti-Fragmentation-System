@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}میزان‌رو - سامانه ضد چندپارگی{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="text-info mb-4">سامانه میزان‌رو</h2>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5>تحلیل متن</h5>
+            </div>
+            <div class="card-body">
+                <form id="mizanro-form">
+                    <div class="mb-3">
+                        <label for="mizanro-input" class="form-label">متن برای تحلیل:</label>
+                        <textarea class="form-control" id="mizanro-input" rows="8" 
+                                  placeholder="متن فارسی خود را برای تحلیل وارد کنید..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-info w-100">
+                        تحلیل متن
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5>نتایج تحلیل</h5>
+            </div>
+            <div class="card-body">
+                <div id="mizanro-results" class="d-none">
+                    <h6>مشخصات تحلیل:</h6>
+                    <ul id="mizanro-analysis" class="list-group mb-4"></ul>
+                    
+                    <div class="progress mb-3">
+                        <div id="complexity-bar" class="progress-bar" role="progressbar" 
+                             style="width: 0%">0%</div>
+                    </div>
+                    <small class="text-muted">امتیاز پیچیدگی متن</small>
+                </div>
+                
+                <div id="mizanro-loading" class="text-center d-none">
+                    <div class="spinner-border text-info" role="status">
+                        <span class="visually-hidden">در حال تحلیل...</span>
+                    </div>
+                    <p class="mt-2">در حال تحلیل متن...</p>
+                </div>
+                
+                <div id="mizanro-error" class="alert alert-danger d-none"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('mizanro-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const textInput = document.getElementById('mizanro-input').value;
+    const resultsDiv = document.getElementById('mizanro-results');
+    const loadingDiv = document.getElementById('mizanro-loading');
+    const errorDiv = document.getElementById('mizanro-error');
+    
+    // پنهان کردن نتایج قبلی و خطا
+    resultsDiv.classList.add('d-none');
+    errorDiv.classList.add('d-none');
+    
+    // نمایش loading
+    loadingDiv.classList.remove('d-none');
+    
+    // ارسال درخواست
+    fetch('/mizanro', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({text: textInput})
+    })
+    .then(response => response.json())
+    .then(data => {
+        loadingDiv.classList.add('d-none');
+        
+        if (data.success) {
+            // نمایش نتایج
+            const analysisList = document.getElementById('mizanro-analysis');
+            analysisList.innerHTML = '';
+            
+            for (const [key, value] of Object.entries(data.analysis)) {
+                const listItem = document.createElement('li');
+                listItem.className = 'list-group-item d-flex justify-content-between align-items-center';
+                listItem.innerHTML = `
+                    <span>${key}:</span>
+                    <span class="badge bg-info rounded-pill">${value}</span>
+                `;
+                analysisList.appendChild(listItem);
+            }
+            
+            // نمایش نوار پیشرفت پیچیدگی
+            const complexity = data.analysis.complexity_score || 0;
+            const complexityBar = document.getElementById('complexity-bar');
+            complexityBar.style.width = complexity + '%';
+            complexityBar.textContent = complexity + '%';
+            
+            // تغییر رنگ بر اساس میزان پیچیدگی
+            if (complexity < 30) {
+                complexityBar.className = 'progress-bar bg-success';
+            } else if (complexity < 70) {
+                complexityBar.className = 'progress-bar bg-warning';
+            } else {
+                complexityBar.className = 'progress-bar bg-danger';
+            }
+            
+            resultsDiv.classList.remove('d-none');
+        } else {
+            errorDiv.textContent = data.error || 'خطا در تحلیل';
+            errorDiv.classList.remove('d-none');
+        }
+    })
+    .catch(error => {
+        loadingDiv.classList.add('d-none');
+        errorDiv.textContent = 'خطا در ارتباط با سرور';
+        errorDiv.classList.remove('d-none');
+    });
+});
+</script>
+{% endblock %}
