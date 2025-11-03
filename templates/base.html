@@ -14,7 +14,7 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
-            <a class="navbar-brand" href="{{ url_for('home') }}">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
                 <img src="{{ url_for('static', filename='images/logo.png') }}" alt="لوگو" height="40" class="d-inline-block align-text-top me-2">
                 سامانه ضد چندپارگی
             </a>
@@ -26,16 +26,16 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('home') }}">خانه</a>
+                        <a class="nav-link" href="{{ url_for('index') }}">خانه</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('nataq_page') }}">نطق مصطلح</a>
+                        <a class="nav-link" href="{{ url_for('nataq') }}">نطق مصطلح</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('mizanro_page') }}">میزان‌رو</a>
+                        <a class="nav-link" href="{{ url_for('mizanro') }}">میزان‌رو</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('anti_fragmentation_page') }}">ضد چندپارگی</a>
+                        <a class="nav-link" href="{{ url_for('anti_fragmentation') }}">ضد چندپارگی</a>
                     </li>
                 </ul>
             </div>
