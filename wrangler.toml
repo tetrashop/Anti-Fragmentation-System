@@ -1,6 +1,6 @@
 name = "anti-fragmentation-system"
-compatibility_date = "2024-03-01"
-main = "worker.js"  # این خط حیاتی است!
+compatibility_date = "2024-11-03"
+main = "worker.js"
+compatibility_flags = ["nodejs_compat"]
 
 [env.production]
-account_id = "your-account-id"  # اگر می‌دانی جایگزین کن، وگرنه خالی بگذار
