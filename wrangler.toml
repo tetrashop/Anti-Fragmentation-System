@@ -1,7 +1,6 @@
 name = "anti-fragmentation-system"
-compatibility_date = "2023-10-30"
-compatibility_flags = ["nodejs_compat"]
+compatibility_date = "2024-03-01"
+main = "worker.js"  # این خط حیاتی است!
 
 [env.production]
-account_id = "$CLOUDFLARE_ACCOUNT_ID"
-workers_dev = true
+account_id = "your-account-id"  # اگر می‌دانی جایگزین کن، وگرنه خالی بگذار
