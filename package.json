@@ -1,0 +1,15 @@
+{
+  "name": "anti-fragmentation-system",
+  "version": "1.0.0",
+  "description": "سامانه ضد چندپارگی - سیستم پردازش زبان فارسی",
+  "main": "worker.js",
+  "scripts": {
+    "deploy": "wrangler deploy"
+  },
+  "keywords": ["persian", "nlp", "text-processing", "cloudflare-workers"],
+  "author": "Tetrashop",
+  "license": "MIT",
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  }
+}
