@@ -1,14 +1,14 @@
 {
   "name": "anti-fragmentation-system",
-  "version": "6.0.0",
-  "description": "سامانه ضد چندپارگی متون تخصصی با عملکرد المپیک",
+  "version": "7.0.0",
+  "description": "سامانه ضد چندپارگی متون تخصصی",
   "main": "worker.js",
-  "type": "module",
   "scripts": {
+    "build": "echo 'No build needed for Cloudflare Worker'",
     "deploy": "wrangler deploy",
     "dev": "wrangler dev"
   },
-  "keywords": ["nlp", "persian", "anti-fragmentation", "text-processing"],
+  "keywords": ["nlp", "persian", "anti-fragmentation"],
   "author": "tetrashop",
   "license": "MIT"
 }
