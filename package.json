@@ -1,15 +1,37 @@
 {
-  "name": "anti-fragmentation-system",
+  "name": "anti-fragmentation-system-quantum",
   "version": "2.0.0",
-  "description": "سامانه ضد چندپارگی متون تخصصی - نسخه پیشرفته",
-  "main": "worker.js",
+  "description": "سامانه ضد چندپارگی متون تخصصی - نسخه کوانتومی با ساختار ماژولار",
   "type": "module",
+  "main": "worker.js",
   "scripts": {
-    "build": "echo 'No build needed for Cloudflare Worker'",
+    "dev": "wrangler dev",
     "deploy": "wrangler deploy",
-    "dev": "wrangler dev"
+    "test": "node tests/runner.js",
+    "build": "echo 'No build step needed for Cloudflare Workers'",
+    "lint": "echo 'No linting configured'",
+    "clean": "rm -rf node_modules package-lock.json"
   },
-  "keywords": ["nlp", "persian", "anti-fragmentation", "text-processing", "advanced-analytics"],
+  "keywords": [
+    "nlp",
+    "persian",
+    "anti-fragmentation",
+    "text-processing",
+    "quantum-modules",
+    "cloudflare-workers",
+    "analytics",
+    "api"
+  ],
   "author": "tetrashop",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tetrashop/anti-fragmentation-system"
+  }
 }
