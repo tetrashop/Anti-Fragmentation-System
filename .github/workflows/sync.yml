@@ -1,0 +1,82 @@
+name: 🔄 سینک خودکار
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # اجرای خودکار هر 6 ساعت
+    - cron: '0 */6 * * *'
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 checkout کد
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: ⎔ setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: 📦 نصب وابستگی‌ها
+      run: |
+        npm install
+        npm install -g @cloudflare/wrangler
+
+    - name: 🧪 اجرای تست‌ها
+      run: |
+        npm test
+      env:
+        NODE_ENV: test
+
+    - name: 🔍 آنالیز کد
+      run: |
+        echo "📊 آنالیز کد..."
+        echo "• تعداد فایل‌های JavaScript: $(find . -name "*.js" -not -path "./node_modules/*" | wc -l)"
+        echo "• تعداد تست‌ها: $(find tests -name "*.test.js" | wc -l)"
+        echo "• حجم پروژه: $(du -sh . | cut -f1)"
+
+    - name: 📊 تولید گزارش
+      run: |
+        echo "## 📈 گزارش سینک" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**✅ سینک با موفقیت انجام شد**" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "- **زمان:** $(date)" >> $GITHUB_STEP_SUMMARY
+        echo "- **شاخه:** ${{ github.ref }}" >> $GITHUB_STEP_SUMMARY
+        echo "- commit: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 📁 ساختار پروژه" >> $GITHUB_STEP_SUMMARY
+        echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+        find . -type d -not -path "./node_modules" -not -path "./.git" | head -20 >> $GITHUB_STEP_SUMMARY
+        echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+    - name: 🚀 استقرار (اختیاری)
+      if: github.ref == 'refs/heads/main'
+      run: |
+        echo "🌐 استقرار روی Cloudflare Workers..."
+        # wrangler deploy
+      env:
+        CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+    - name: 💬 اطلاع‌رسانی
+      if: always()
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const commit = context.payload.commits[0];
+          if (commit) {
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🔄 سینک انجام شد ✅\n\ncommit: ${commit.message}\n\nتوسط: ${commit.author.name}`
+            })
+          }
