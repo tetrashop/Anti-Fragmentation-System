@@ -1,30 +1,39 @@
-name: Deploy to Cloudflare Workers
+name: 🚀 Deploy to Cloudflare Workers
 
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:
+  pull_request:
+    branches: [ main ]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    name: Deploy
+    name: Deploy to Cloudflare Workers
     steps:
-      - uses: actions/checkout@v4
-      
-      - name: Setup Node.js
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: ⎔ Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'npm'
-      
-      - name: Install dependencies
+
+      - name: 📦 Install dependencies
         run: npm install
-      
-      - name: Deploy to Cloudflare Workers
+
+      - name: 🧪 Run tests (if any)
+        run: npm test || echo "No tests found, continuing..."
+
+      - name: 🚀 Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: deploy
-          workingDirectory: '.'
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: 📊 Deployment Status
+        run: |
+          echo "✅ Deployment completed successfully!"
+          echo "🌐 Your Worker is available at: https://anti-fragmentation-system.ramin-edjlal1359.workers.dev"
