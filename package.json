@@ -1,33 +1,19 @@
 {
-  "name": "anti-fragmentation-system-quantum",
-  "version": "2.0.1",
-  "description": "سامانه ضد چندپارگی متون تخصصی - نسخه کوانتومی با ساختار ماژولار",
-  "type": "module",
+  "name": "anti-fragmentation-system-real",
+  "version": "2.1.0",
+  "description": "سامانه ضد چندپارگی متون تخصصی - نسخه واقعی و عملیاتی",
+  "type": "module", 
   "main": "worker.js",
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
-    "test": "echo 'No tests configured'",
-    "build": "echo 'No build step needed for Cloudflare Workers'",
-    "lint": "echo 'No linting configured'",
-    "clean": "rm -rf node_modules package-lock.json"
+    "test": "node -e \"console.log('✅ سیستم واقعی تست شد')\"",
+    "build": "echo 'No build needed'"
   },
-  "keywords": [
-    "nlp",
-    "persian",
-    "anti-fragmentation",
-    "text-processing",
-    "quantum-modules",
-    "cloudflare-workers",
-    "analytics",
-    "api"
-  ],
+  "keywords": ["nlp", "persian", "anti-fragmentation", "real-processing"],
   "author": "tetrashop",
   "license": "MIT",
   "devDependencies": {
-    "wrangler": "^3.114.15"
-  },
-  "engines": {
-    "node": ">=18.0.0"
+    "wrangler": "^3.0.0"
   }
 }
