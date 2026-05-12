@@ -42,4 +42,4 @@ def api_anti_frag():
 if __name__ == '__main__':
     print("🚀 سامانه ضد چندپارگی در حال راه‌اندازی...")
     print("🌐 آدرس: http://localhost:5001")
-    app.run(host='0.0.0.0', port=5001, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)

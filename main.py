@@ -20,16 +20,52 @@ sys.path.insert(0, os.path.join(current_dir, 'text_processor'))
 def index():
     return render_template('index.html')
 
-@app.route('/nataq')
+@app.route('/nataq', methods=['GET', 'POST'])
 def nataq():
+    if request.method == 'POST':
+        data = request.get_json()
+        if not data or 'text' not in data:
+            return jsonify({'error': 'Bad Request', 'message': 'Input text is required'}), 400
+        from text_processor import NataqProcessor
+        proc = NataqProcessor()
+        result = proc.process(data['text'])
+        return jsonify({'success': True, 'processed_text': result})
     return render_template('nataq.html')
 
-@app.route('/mizanro')
+@app.route('/mizanro', methods=['GET', 'POST'])
 def mizanro():
+    if request.method == 'POST':
+        data = request.get_json()
+        if not data or 'text' not in data:
+            return jsonify({'error': 'Bad Request', 'message': 'Input text is required'}), 400
+        from text_processor import MizanroAnalyzer
+        analyzer = MizanroAnalyzer()
+        result = analyzer.analyze(data['text'])
+        return jsonify(result)
     return render_template('mizanro.html')
 
-@app.route('/anti_fragmentation')
+@app.route('/anti_fragmentation', methods=['GET', 'POST'])
 def anti_fragmentation():
+    if request.method == 'POST':
+        data = request.get_json()
+        if not data or 'text' not in data:
+            return jsonify({'error': 'Bad Request', 'message': 'Input text is required'}), 400
+        from text_processor import AntiFragmentation
+        proc = AntiFragmentation()
+        original = data['text']
+        result_dict = proc.process(original)
+        processed = result_dict['processed_text'] if isinstance(result_dict, dict) else result_dict
+        score_before = proc._calculate_fragmentation(original)
+        score_after = proc._calculate_fragmentation(processed)
+        improvement = round((1 - score_after/score_before)*100, 2) if score_before else 100
+        return jsonify({
+            'success': True,
+            'original_text': original,
+            'processed_text': processed,
+            'fragmentation_score_before': score_before,
+            'fragmentation_score_after': score_after,
+            'improvement_percentage': improvement
+        })
     return render_template('anti_fragmentation.html')
 
 # توابع کمکی برای پردازش متن
@@ -76,13 +112,13 @@ def api_nataq():
         text = data.get('text', '') if data else ''
         
         if not text:
-            return jsonify({'error': 'متن ورودی ضروری است'}), 400
+            return jsonify({'error': 'Bad Request', 'message': 'Input text is required'}), 400
         
         result = simple_nataq_processing(text)
         return jsonify({'result': result})
         
     except Exception as e:
-        return jsonify({'error': f'خطا در پردازش: {str(e)}'}), 500
+        return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
 
 @app.route('/api/mizanro', methods=['POST'])
 def api_mizanro():
@@ -91,13 +127,13 @@ def api_mizanro():
         text = data.get('text', '') if data else ''
         
         if not text:
-            return jsonify({'error': 'متن ورودی ضروری است'}), 400
+            return jsonify({'error': 'Bad Request', 'message': 'Input text is required'}), 400
         
         result = simple_mizanro_analysis(text)
         return jsonify(result)
         
     except Exception as e:
-        return jsonify({'error': f'خطا در تحلیل: {str(e)}'}), 500
+        return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
 
 @app.route('/api/anti_fragmentation', methods=['POST'])
 def api_anti_frag():
@@ -106,13 +142,13 @@ def api_anti_frag():
         text = data.get('text', '') if data else ''
         
         if not text:
-            return jsonify({'error': 'متن ورودی ضروری است'}), 400
+            return jsonify({'error': 'Bad Request', 'message': 'Input text is required'}), 400
         
         result = simple_anti_fragmentation(text)
         return jsonify(result)
         
     except Exception as e:
-        return jsonify({'error': f'خطا در پردازش: {str(e)}'}), 500
+        return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
 
 # Route برای تست سلامت سیستم
 @app.route('/health')
