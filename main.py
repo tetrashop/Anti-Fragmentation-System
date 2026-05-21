@@ -155,6 +155,71 @@ def api_anti_frag():
 def health():
     return jsonify({'status': 'healthy', 'service': 'Anti-Fragmentation System'})
 
+
+# ======================================================================
+# سیستم بروزرسانی الگوریتم‌ها (Algorithm Update System)
+# ======================================================================
+from algorithm_manager import AlgorithmManager
+algo_mgr = AlgorithmManager(".")
+
+@app.route('/algorithms', methods=['GET'])
+def list_algorithms():
+    """لیست الگوریتم‌های قابل مدیریت"""
+    return jsonify({
+        "algorithms": list(algo_mgr.algorithms.keys()),
+        "endpoints": {
+            "list_backups": "/algorithms/<name>/backups",
+            "get_code": "/algorithms/<name>/code",
+            "update": "/algorithms/<name>/update",
+            "rollback": "/algorithms/<name>/rollback"
+        }
+    })
+
+@app.route('/algorithms/<algo_name>/backups', methods=['GET'])
+def list_backups(algo_name):
+    """مشاهده پشتیبان‌های یک الگوریتم"""
+    try:
+        backups = algo_mgr.list_backups(algo_name)
+        return jsonify({"algo_name": algo_name, "backups": backups.get(algo_name, [])})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+@app.route('/algorithms/<algo_name>/code', methods=['GET'])
+def get_algorithm_code(algo_name):
+    """دریافت کد فعلی یک الگوریتم"""
+    try:
+        code = algo_mgr.get_current_algorithm_code(algo_name)
+        return jsonify({"algo_name": algo_name, "code": code})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+@app.route('/algorithms/<algo_name>/update', methods=['POST'])
+def update_algorithm(algo_name):
+    """به‌روزرسانی کد یک الگوریتم"""
+    data = request.get_json()
+    if not data or 'code' not in data:
+        return jsonify({"error": "فیلد 'code' الزامی است"}), 400
+
+    success, message = algo_mgr.update_algorithm(algo_name, data['code'])
+    if success:
+        return jsonify({"success": True, "message": message})
+    else:
+        return jsonify({"success": False, "error": message}), 400
+
+@app.route('/algorithms/<algo_name>/rollback', methods=['POST'])
+def rollback_algorithm(algo_name):
+    """بازگشت به یک نسخه پشتیبان"""
+    data = request.get_json()
+    if not data or 'backup_path' not in data:
+        return jsonify({"error": "فیلد 'backup_path' الزامی است"}), 400
+
+    try:
+        success = algo_mgr.rollback_algorithm(algo_name, data['backup_path'])
+        return jsonify({"success": success, "message": "بازگشت با موفقیت انجام شد"})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 400
+
+
 if __name__ == '__main__':
     print("=" * 50)
     print("🚀 سامانه ضد چندپارگی - Anti-Fragmentation System")
