@@ -1,82 +1,80 @@
-{% extends "base.html" %}
-
-{% block title %}خانه - سامانه ضد چندپارگی{% endblock %}
-
-{% block content %}
-<div class="row">
-    <div class="col-12 text-center mb-5">
-        <h1 class="display-4 text-primary">به سامانه ضد چندپارگی خوش آمدید</h1>
-        <p class="lead">سامانه پیشرفته پردازش زبان فارسی با قابلیت‌های متنوع</p>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-md-4 mb-4">
-        <div class="card h-100">
-            <div class="card-body text-center">
-                <h5 class="card-title text-success">نطق مصطلح</h5>
-                <p class="card-text">پردازش و بهینه‌سازی تلفظ و گویش متن فارسی</p>
-                <a href="{{ url_for('nataq') }}" class="btn btn-success">ورود به بخش</a>
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سامانه ضد چندپارگی</title>
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <img src="/static/images/logo.svg" alt="لوگو" height="40" class="d-inline-block align-text-top me-2">
+                سامانه ضد چندپارگی
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="/">خانه</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/nataq">نطق مصطلح</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/mizanro">میزان‌رو</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/anti_fragmentation">ضد چندپارگی</a></li>
+                </ul>
             </div>
         </div>
-    </div>
-    
-    <div class="col-md-4 mb-4">
-        <div class="card h-100">
-            <div class="card-body text-center">
-                <h5 class="card-title text-info">میزان‌رو</h5>
-                <p class="card-text">تحلیل و سنجش کیفیت متن با معیارهای پیشرفته</p>
-                <a href="{{ url_for('mizanro') }}" class="btn btn-info">ورود به بخش</a>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-4 mb-4">
-        <div class="card h-100">
-            <div class="card-body text-center">
-                <h5 class="card-title text-warning">ضد چندپارگی</h5>
-                <p class="card-text">کاهش چندپارگی و یکپارچه‌سازی متن</p>
-                <a href="{{ url_for('anti_fragmentation') }}" class="btn btn-warning">ورود به بخش</a>
-            </div>
-        </div>
-    </div>
-</div>
+    </nav>
 
-<div class="row mt-5">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header bg-primary text-white">
-                <h4>وضعیت سامانه</h4>
-            </div>
-            <div class="card-body">
-                <div id="system-status">
-                    <p>در حال بررسی وضعیت...</p>
+    <main class="container my-4">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h1 class="mb-4">🚀 سامانه ضد چندپارگی</h1>
+                <p class="lead">پردازش هوشمند متون فارسی با سه ماژول تخصصی</p>
+                <div id="health-status" class="mt-3">
+                    <span style="color: green;">✅ سرویس فعال است</span>
                 </div>
             </div>
         </div>
-    </div>
-</div>
-{% endblock %}
+        <div class="row mt-4">
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">💬 نطق مصطلح</div>
+                    <div class="card-body">
+                        <p>اصلاح نویسه‌های عربی و استانداردسازی تلفظ</p>
+                        <a href="/nataq" class="btn btn-primary w-100">ورود</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-header bg-info text-white">📊 میزان‌رو</div>
+                    <div class="card-body">
+                        <p>تحلیل کیفیت متن و سنجش خوانایی</p>
+                        <a href="/mizanro" class="btn btn-info w-100">ورود</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-header bg-warning">🔄 ضد چندپارگی</div>
+                    <div class="card-body">
+                        <p>کاهش چندپارگی و بهینه‌سازی متن</p>
+                        <a href="/anti_fragmentation" class="btn btn-warning w-100">ورود</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
 
-{% block scripts %}
-<script>
-// بررسی وضعیت سامانه
-fetch('/api/health')
-    .then(response => response.json())
-    .then(data => {
-        const statusDiv = document.getElementById('system-status');
-        const statusText = data.modules_loaded ? 'فعال' : 'مشکل در بارگذاری ماژول‌ها';
-        const statusClass = data.modules_loaded ? 'text-success' : 'text-danger';
-        
-        statusDiv.innerHTML = `
-            <p><strong>وضعیت:</strong> <span class="${statusClass}">${statusText}</span></p>
-            <p><strong>ماژول‌ها:</strong> ${data.modules_loaded ? 'بارگذاری شده' : 'بارگذاری نشده'}</p>
-            <p><strong>سامانه:</strong> ${data.system}</p>
-        `;
-    })
-    .catch(error => {
-        document.getElementById('system-status').innerHTML = 
-            '<p class="text-danger">خطا در بررسی وضعیت سامانه</p>';
-    });
-</script>
-{% endblock %}
+    <footer class="bg-dark text-light py-4 mt-5">
+        <div class="container text-center">
+            <p>&copy; 2025 سامانه ضد چندپارگی - نسخه ۲.۱</p>
+        </div>
+    </footer>
+
+    <script src="/static/js/bootstrap.min.js"></script>
+</body>
+</html>
