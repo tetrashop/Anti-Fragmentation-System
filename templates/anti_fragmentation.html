@@ -1,132 +1,76 @@
-{% extends "base.html" %}
-
-{% block title %}ضد چندپارگی - سامانه ضد چندپارگی{% endblock %}
-
-{% block content %}
-<div class="row">
-    <div class="col-12">
-        <h2 class="text-warning mb-4">سامانه ضد چندپارگی</h2>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header bg-warning text-dark">
-                <h5>ورودی متن</h5>
-            </div>
-            <div class="card-body">
-                <form id="anti-frag-form">
-                    <div class="mb-3">
-                        <label for="anti-frag-input" class="form-label">متن دارای چندپارگی:</label>
-                        <textarea class="form-control" id="anti-frag-input" rows="8" 
-                                  placeholder="متن فارسی با چندپارگی را وارد کنید..."></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-warning w-100">
-                        کاهش چندپارگی
-                    </button>
-                </form>
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ضد چندپارگی - سامانه ضد چندپارگی</title>
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">🏠 سامانه ضد چندپارگی</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="/">خانه</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/nataq">نطق مصطلح</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/mizanro">میزان‌رو</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/anti_fragmentation">ضد چندپارگی</a></li>
+                </ul>
             </div>
         </div>
-    </div>
-    
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header bg-warning text-dark">
-                <h5>نتایج پردازش</h5>
+    </nav>
+
+    <main class="container my-4">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-warning"><h5>ورودی متن</h5></div>
+                    <div class="card-body">
+                        <form id="anti-frag-form">
+                            <div class="mb-3">
+                                <label for="anti-frag-input" class="form-label">متن دارای چندپارگی:</label>
+                                <textarea class="form-control" id="anti-frag-input" rows="6" placeholder="متنی با فاصله‌های اضافی وارد کنید..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-warning w-100">کاهش چندپارگی</button>
+                        </form>
+                    </div>
+                </div>
             </div>
-            <div class="card-body">
-                <div id="anti-frag-results" class="d-none">
-                    <h6>متن بهینه شده:</h6>
-                    <p id="optimized-text" class="bg-light p-3 rounded"></p>
-                    
-                    <h6>مقایسه امتیاز چندپارگی:</h6>
-                    <div class="row text-center">
-                        <div class="col-6">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h5 id="score-before" class="text-danger">0</h5>
-                                    <small>قبل از پردازش</small>
-                                </div>
-                            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-warning"><h5>نتایج پردازش</h5></div>
+                    <div class="card-body">
+                        <div id="anti-frag-results" class="d-none">
+                            <h6>متن بهینه شده:</h6>
+                            <p id="optimized-text" class="bg-light p-3 rounded"></p>
+                            <h6>مقایسه امتیاز:</h6>
+                            <p>قبل: <strong id="score-before" class="text-danger"></strong></p>
+                            <p>بعد: <strong id="score-after" class="text-success"></strong></p>
+                            <p>درصد بهبود: <strong id="improvement-percent"></strong>%</p>
                         </div>
-                        <div class="col-6">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h5 id="score-after" class="text-success">0</h5>
-                                    <small>بعد از پردازش</small>
-                                </div>
-                            </div>
+                        <div id="anti-frag-loading" class="text-center d-none">
+                            <div class="spinner-border text-warning"></div>
+                            <p class="mt-2">در حال پردازش...</p>
                         </div>
-                    </div>
-                    
-                    <div class="alert alert-success mt-3">
-                        <strong>درصد بهبود:</strong> 
-                        <span id="improvement-percent">0</span>%
+                        <div id="anti-frag-error" class="alert alert-danger d-none"></div>
                     </div>
                 </div>
-                
-                <div id="anti-frag-loading" class="text-center d-none">
-                    <div class="spinner-border text-warning" role="status">
-                        <span class="visually-hidden">در حال پردازش...</span>
-                    </div>
-                    <p class="mt-2">در حال کاهش چندپارگی...</p>
-                </div>
-                
-                <div id="anti-frag-error" class="alert alert-danger d-none"></div>
             </div>
         </div>
-    </div>
-</div>
-{% endblock %}
+    </main>
 
-{% block scripts %}
-<script>
-document.getElementById('anti-frag-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const textInput = document.getElementById('anti-frag-input').value;
-    const resultsDiv = document.getElementById('anti-frag-results');
-    const loadingDiv = document.getElementById('anti-frag-loading');
-    const errorDiv = document.getElementById('anti-frag-error');
-    
-    // پنهان کردن نتایج قبلی و خطا
-    resultsDiv.classList.add('d-none');
-    errorDiv.classList.add('d-none');
-    
-    // نمایش loading
-    loadingDiv.classList.remove('d-none');
-    
-    // ارسال درخواست
-    fetch('/anti-fragmentation', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: 'text=' + encodeURIComponent(textInput)
-    })
-    .then(response => response.json())
-    .then(data => {
-        loadingDiv.classList.add('d-none');
-        
-        if (data.success) {
-            // نمایش نتایج
-            document.getElementById('optimized-text').textContent = data.processed_text;
-            document.getElementById('score-before').textContent = data.fragmentation_score_before;
-            document.getElementById('score-after').textContent = data.fragmentation_score_after;
-            document.getElementById('improvement-percent').textContent = data.improvement_percentage;
-            
-            resultsDiv.classList.remove('d-none');
-        } else {
-            errorDiv.textContent = data.error || 'خطا در پردازش';
-            errorDiv.classList.remove('d-none');
-        }
-    })
-    .catch(error => {
-        loadingDiv.classList.add('d-none');
-        errorDiv.textContent = 'خطا در ارتباط با سرور';
-        errorDiv.classList.remove('d-none');
-    });
-});
-</script>
-{% endblock %}
+    <footer class="bg-dark text-light py-4 mt-5">
+        <div class="container text-center">
+            <p>&copy; 2025 سامانه ضد چندپارگی</p>
+        </div>
+    </footer>
+
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="/static/js/script.js"></script>
+</body>
+</html>
