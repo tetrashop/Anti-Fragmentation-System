@@ -1,240 +1,93 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-پردازشگر جامع «نطق مصطلح» - نسخه دانشگاهی
-ویرایش هوشمند متون فارسی و عربی با استانداردهای آکادمیک
-"""
-
 import re
 
 class NataqProcessor:
-    def __init__(self, max_length: int = None):
-        """
-        max_length: حداکثر طول مجاز متن (مثلاً ۲۵۰ کلمه برای چکیده)
-        """
+    def __init__(self, max_length=None):
         self.max_length = max_length
         
-        # نگاشت نویسه‌های عربی به فارسی
-        self.arabic_chars = {
+        # نگاشت نویسه - دیکشنری برای سرعت
+        self.arabic_map = str.maketrans({
             'ي': 'ی', 'ك': 'ک', 'ى': 'ی', 'ة': 'ه', 'ۀ': 'هٔ',
             'ؤ': 'و', 'ئ': 'ی', 'أ': 'ا', 'إ': 'ا', 'آ': 'ا',
-        }
+        })
+        self.num_map = str.maketrans({
+            '0': '۰','1': '۱','2': '۲','3': '۳','4': '۴',
+            '5': '۵','6': '۶','7': '۷','8': '۸','9': '۹',
+            '٠': '۰','١': '۱','٢': '۲','٣': '۳','٤': '۴',
+            '٥': '۵','٦': '۶','٧': '۷','٨': '۸','٩': '۹',
+        })
         
-        # اعداد
-        self.eng_nums = dict(zip('0123456789', '۰۱۲۳۴۵۶۷۸۹'))
-        self.ar_nums = dict(zip('٠١٢٣٤٥٦٧٨٩', '۰۱۲۳۴۵۶۷۸۹'))
+        # قوانین - کامپایل رجکس برای سرعت
+        self._mi_re = re.compile(r'\b(می|نمی)\s+(?=\w)')
+        self._suffix_re = re.compile(r'(?<=\w)\s+(ها|های|تر|ترین|اش|ام|ات|ای|ایم|اید|اند)\b')
+        self._space_before_punc = re.compile(r'\s+([،؛:!؟\.\)\]\}…])')
+        self._space_after_punc = re.compile(r'([،؛:!؟\.\(\[\{…])(?!\s)')
+        self._multi_space = re.compile(r' +')
+        self._multi_zwnj = re.compile(r'‌{2,}')
+        self._he_ye = re.compile(r'(?<=\wه)\s+ی\b')
         
-        # پیشوندها و پسوندهای نیم‌فاصله
-        self.mi_prefixes = ['می', 'نمی', 'همی']
-        self.suffixes = ['ها', 'های', 'تر', 'ترین', 'اش', 'ام', 'ات', 
-                        'ای', 'ایم', 'اید', 'اند', 'بود', 'شود', 'کرد']
-        
-        # اصلاحات املایی دانشگاهی
-        self.academic_spell = {
-            # افعال پرکاربرد
+        # اصلاحات - فقط موارد پرتکرار
+        self._fixes = {
             'می شود': 'می‌شود', 'نمی شود': 'نمی‌شود',
             'می کند': 'می‌کند', 'نمی کند': 'نمی‌کند',
-            'می دهد': 'می‌دهد', 'نمی دهد': 'نمی‌دهد',
-            'می رود': 'می‌رود', 'نمی رود': 'نمی‌رود',
-            'می گوید': 'می‌گوید', 'نمی گوید': 'نمی‌گوید',
             'می باشد': 'می‌باشد', 'نمی باشد': 'نمی‌باشد',
-            'می خواهم': 'می‌خواهم', 'نمی خواهم': 'نمی‌خواهم',
-            'می خواست': 'می‌خواست', 'نمی خواست': 'نمی‌خواست',
             'می توان': 'می‌توان', 'نمی توان': 'نمی‌توان',
-            'می یابد': 'می‌یابد', 'نمی یابد': 'نمی‌یابد',
-            'می نماید': 'می‌نماید', 'نمی نماید': 'نمی‌نماید',
-            'می گردد': 'می‌گردد', 'نمی گردد': 'نمی‌گردد',
-            
-            # واژگان دانشگاهی
-            'به وسیله': 'به‌وسیله', 'به وسیلهٔ': 'به‌وسیلهٔ',
-            'به منزله': 'به‌منزلۀ', 'به منزلهٔ': 'به‌منزلۀ',
-            'به طور': 'به‌طور', 'به طوری': 'به‌طوری',
-            'به گونه': 'به‌گونه', 'به گونه ای': 'به‌گونه‌ای',
-            'به جهت': 'به‌جهت', 'به دلیل': 'به‌دلیل',
-            'به علاوه': 'به‌علاوه', 'به عبارت': 'به‌عبارت',
-            'به ترتیب': 'به‌ترتیب', 'به ترتیبی': 'به‌ترتیبی',
-            'به خصوص': 'به‌خصوص', 'به ویژه': 'به‌ویژه',
-            'به طور کلی': 'به‌طور کلی', 'به طور خلاصه': 'به‌طور خلاصه',
-            'در مورد': 'درمورد', 'در خصوص': 'درخصوص',
-            'در رابطه': 'دررابطه', 'در ارتباط': 'درارتباط',
-            'از جمله': 'ازجمله', 'از طریق': 'ازطریق',
-            'از نظر': 'ازنظر', 'از لحاظ': 'ازلحاظ',
-            'با توجه': 'با‌توجه', 'با وجود': 'با‌وجود',
-            'با این': 'با‌این', 'با آن': 'با‌آن',
-            
-            # اصطلاحات علمی
-            'به کار': 'به‌کار', 'به کارگیری': 'به‌کارگیری',
-            'به عمل': 'به‌عمل', 'به وجود': 'به‌وجود',
-            'به شمار': 'به‌شمار', 'به حساب': 'به‌حساب',
-            'پیش بینی': 'پیش‌بینی', 'پیش بینی شده': 'پیش‌بینی‌شده',
-            'پیش گفته': 'پیش‌گفته', 'پیش رو': 'پیش‌رو',
-            'پیش نیاز': 'پیش‌نیاز', 'پیش شرط': 'پیش‌شرط',
-            'پس از': 'پس‌از', 'پیش از': 'پیش‌از',
-            'هم چنین': 'همچنین', 'هم چنان': 'همچنان',
-            'هم اکنون': 'هم‌اکنون', 'هم اکنون': 'هم‌اکنون',
-            'هر چند': 'هرچند', 'هر گاه': 'هرگاه',
-            'هر کدام': 'هرکدام', 'هر یک': 'هریک',
-            
-            # واژگان مرکب
+            'به وسیله': 'به‌وسیله', 'به طور': 'به‌طور',
+            'به منزله': 'به‌منزلۀ', 'به گونه': 'به‌گونه',
+            'با توجه': 'با‌توجه', 'از طریق': 'ازطریق',
             'آنها': 'آن‌ها', 'اینها': 'این‌ها',
-            'چه طور': 'چطور', 'چه گونه': 'چگونه', 'چه قدر': 'چقدر',
-            'کدام یک': 'کدام‌یک', 'چنان چه': 'چنانچه',
-            'بهترین': 'بهترین', 'بهترين': 'بهترین',
-            'بزرگترین': 'بزرگ‌ترین', 'کوچکترین': 'کوچک‌ترین',
-            'مهمترین': 'مهم‌ترین', 'عمده‌ترین': 'عمده‌ترین',
-            
-            # اصلاحات نگارشی
-            '...': '…', '..': '…',
-            '--': '–', '---': '—',
-            '""': '«»', "''": '«»',
-            
-            # غلط‌های املایی رایج دانشگاهی
-            'مساله': 'مسئله', 'مسأله': 'مسئله',
-            'جرا': 'چرا', 'چطور': 'چطور',
-            'انها': 'آن‌ها', 'انها': 'آن‌ها',
-            'انچه': 'آنچه', 'ان چه': 'آنچه',
-            'بدین': 'بدین', 'بدینوسیله': 'بدین‌وسیله',
-            'بدین وسیله': 'بدین‌وسیله', 'بدینوسیله': 'بدین‌وسیله',
+            'پیش بینی': 'پیش‌بینی', 'هم چنین': 'همچنین',
+            '...': '…', 'مساله': 'مسئله',
         }
-        
-        # الگوهای نگارشی دانشگاهی
-        self.academic_patterns = [
-            (r'\b(\d+)\s*-\s*(\d+)\b', r'\1 تا \2'),  # 5-10 → ۵ تا ۱۰
-            (r'(\w)\s*\.\s*(\w)', r'\1. \2'),  # فاصله بین نقطه و کلمه
-            (r'\(\s*', '('),  # حذف فاصله بعد از پرانتز باز
-            (r'\s*\)', ')'),  # حذف فاصله قبل از پرانتز بسته
-        ]
     
-    def process(self, text: str) -> str:
-        """پردازش کامل متن دانشگاهی"""
+    def process(self, text):
         if not text:
             return text
         
-        t = text
+        # ۱. ترنسلیت سریع نویسه‌ها
+        t = text.translate(self.arabic_map)
+        t = t.translate(self.num_map)
         
-        # ۱. نویسه‌های عربی → فارسی
-        t = self._fix_characters(t)
+        # ۲. نیم‌فاصله پیشوندها (فقط می/نمی)
+        t = self._mi_re.sub(r'\1‌', t)
         
-        # ۲. اعداد → فارسی
-        t = self._fix_numbers(t)
+        # ۳. نیم‌فاصله پسوندها
+        t = self._suffix_re.sub(r'‌\1', t)
         
-        # ۳. نیم‌فاصله پیشوندها
-        t = self._fix_prefixes(t)
+        # ۴. اصلاحات سریع (فقط موارد پرتکرار)
+        for wrong, right in self._fixes.items():
+            t = t.replace(wrong, right)
         
-        # ۴. نیم‌فاصله پسوندها
-        t = self._fix_suffixes(t)
+        # ۵. نگارش
+        t = self._space_before_punc.sub(r'\1', t)
+        t = self._space_after_punc.sub(r'\1 ', t)
         
-        # ۵. اصلاحات املایی دانشگاهی
-        t = self._fix_academic_spelling(t)
+        # ۶. حذف فاصله اضافی
+        t = self._multi_space.sub(' ', t)
+        t = self._multi_zwnj.sub('‌', t)
         
-        # ۶. نشانه‌های نگارشی
-        t = self._fix_punctuation(t)
-        
-        # ۷. الگوهای دانشگاهی
-        for pattern, replacement in self.academic_patterns:
-            t = re.sub(pattern, replacement, t)
-        
-        # ۸. حذف فاصله‌های اضافی
-        t = re.sub(r' +', ' ', t)
-        
-        # ۹. اصلاح نیم‌فاصله‌های تکراری
-        t = re.sub(r'‌{2,}', '‌', t)
-        
-        # ۱۰. اصلاح فاصله بین «ه» و «ی» نکره
-        t = re.sub(r'(?<=\wه)\s+ی\b', '‌ای', t)
-        
-        # ۱۱. اصلاح «است» بعد از کلمات
-        t = re.sub(r'(?<=\w)\s+است\b', ' است', t)
+        # ۷. «ه ی» نکره
+        t = self._he_ye.sub('‌ای', t)
         
         return t.strip()
     
-    def process_with_limit(self, text: str) -> dict:
-        """
-        پردازش با محدودیت طول
-        بازگشت: متن پردازش‌شده + اطلاعات طول
-        """
+    def process_with_limit(self, text):
         processed = self.process(text)
-        word_count = len(processed.split())
-        char_count = len(processed)
+        words = processed.split()
+        wc = len(words)
         
-        result = {
-            "processed_text": processed,
-            "word_count": word_count,
-            "char_count": char_count,
-            "success": True
-        }
+        r = {"processed_text": processed, "word_count": wc, 
+             "char_count": len(processed), "success": True}
         
         if self.max_length:
-            result["max_length"] = self.max_length
-            result["remaining_words"] = self.max_length - word_count
-            result["remaining_chars"] = self.max_length * 5 - char_count  # تقریبی
-            result["exceeded"] = word_count > self.max_length
-            
-            if word_count > self.max_length:
-                result["warning"] = f"⚠️ متن {word_count - self.max_length} کلمه از حد مجاز ({self.max_length}) فراتر رفته است"
-                # خلاصه‌سازی اضطراری (اختیاری)
-                words = processed.split()
-                result["trimmed_text"] = ' '.join(words[:self.max_length]) + '…'
-            else:
-                result["warning"] = None
+            r["max_length"] = self.max_length
+            r["remaining"] = self.max_length - wc
+            if wc > self.max_length:
+                r["warning"] = f"⚠️ {wc - self.max_length} کلمه اضافه"
+                r["trimmed"] = ' '.join(words[:self.max_length]) + '…'
         
-        return result
+        return r
     
-    # ======================= متدهای کمکی =======================
-    def _fix_characters(self, text: str) -> str:
-        for k, v in self.arabic_chars.items():
-            text = text.replace(k, v)
-        return text
-    
-    def _fix_numbers(self, text: str) -> str:
-        for k, v in self.eng_nums.items():
-            text = text.replace(k, v)
-        for k, v in self.ar_nums.items():
-            text = text.replace(k, v)
-        return text
-    
-    def _fix_prefixes(self, text: str) -> str:
-        for pref in self.mi_prefixes:
-            text = re.sub(r'\b' + pref + r'\s+(?=\w)', pref + '‌', text)
-        return text
-    
-    def _fix_suffixes(self, text: str) -> str:
-        for suf in self.suffixes:
-            text = re.sub(r'(?<=\w)\s+' + suf + r'\b', '‌' + suf, text)
-        return text
-    
-    def _fix_academic_spelling(self, text: str) -> str:
-        for wrong, right in self.academic_spell.items():
-            text = text.replace(wrong, right)
-        return text
-    
-    def _fix_punctuation(self, text: str) -> str:
-        punctuation = r'،؛:!؟\.\)\]\}…'
-        # حذف فاصله قبل از نشانه
-        text = re.sub(r'\s+([{0}])'.format(punctuation), r'\1', text)
-        # یک فاصله بعد از نشانه
-        text = re.sub(r'([{0}])(?!\s)'.format(punctuation), r'\1 ', text)
-        return text
-    
-    def analyze(self, text: str) -> dict:
-        """تحلیل کامل متن با گزارش تغییرات"""
-        processed = self.process(text)
-        changes = []
-        
-        if text != processed:
-            if any(k in text for k in self.arabic_chars):
-                changes.append("اصلاح نویسه‌های عربی")
-            if '‌' in processed and '‌' not in text:
-                changes.append("افزودن نیم‌فاصله‌های استاندارد")
-            if len(text) != len(processed):
-                changes.append("بهینه‌سازی فاصله‌گذاری")
-        
-        return {
-            "original": text,
-            "processed": processed,
-            "changed": text != processed,
-            "changes": changes,
-            "char_count_before": len(text),
-            "char_count_after": len(processed),
-            "word_count": len(processed.split())
-        }
+    def analyze(self, text):
+        p = self.process(text)
+        return {"original": text, "processed": p, 
+                "changed": text != p, "word_count": len(p.split())}
