@@ -16,6 +16,10 @@ sys.path.insert(0, os.path.join(current_dir, 'text_processor'))
 # Routeهای اصلی
 @app.route('/')
 @app.route('/home')
+@app.route('/favicon.ico')
+def favicon():
+    return app.send_static_file('images/logo.svg')
+
 @app.route('/index')
 def index():
     return render_template('index.html')
@@ -151,6 +155,7 @@ def api_anti_frag():
         return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
 
 # Route برای تست سلامت سیستم
+@app.route('/api/health')
 @app.route('/health')
 def health():
     return jsonify({'status': 'healthy', 'service': 'Anti-Fragmentation System'})
@@ -219,6 +224,14 @@ def rollback_algorithm(algo_name):
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 400
 
+
+
+@app.after_request
+def add_cors_headers(response):
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+    return response
 
 if __name__ == '__main__':
     print("=" * 50)

@@ -1,230 +1,131 @@
-// اسکریپت‌های عمومی سامانه ضد چندپارگی
+// اسکریپت‌های عمومی سامانه ضد چندپارگی - نسخه ۲.۰
 
-document.addEventListener('DOMContentLoaded', function() {
-    // مقداردهی اولیه توستر (اگر نیاز باشد)
-    initializeToasts();
-    
-    // مدیریت فرم‌ها
-    initializeForms();
-    
-    // نمایش انیمیشن‌ها
-    initializeAnimations();
-    
-    // مدیریت وضعیت سامانه
-    checkSystemStatus();
-});
-
-// تابع برای مقداردهی توسترها
-function initializeToasts() {
-    const toastElList = [].slice.call(document.querySelectorAll('.toast'));
-    const toastList = toastElList.map(function(toastEl) {
-        return new bootstrap.Toast(toastEl);
-    });
+function showLoading(loaderId, resultsId, errorId) {
+    document.getElementById(resultsId).classList.add('d-none');
+    document.getElementById(errorId).classList.add('d-none');
+    document.getElementById(loaderId).classList.remove('d-none');
 }
 
-// تابع برای مدیریت فرم‌ها
-function initializeForms() {
-    // پاک کردن خودکار پیام‌های خطا هنگام تایپ
-    const textareas = document.querySelectorAll('textarea.form-control');
-    textareas.forEach(textarea => {
-        textarea.addEventListener('input', function() {
-            const errorDiv = this.closest('.card-body').querySelector('.alert-danger');
-            if (errorDiv && !errorDiv.classList.contains('d-none')) {
-                errorDiv.classList.add('d-none');
+function hideLoading(loaderId) {
+    document.getElementById(loaderId).classList.add('d-none');
+}
+
+function showError(errorId, message) {
+    var errDiv = document.getElementById(errorId);
+    errDiv.textContent = message;
+    errDiv.classList.remove('d-none');
+}
+
+// نطق مصطلح
+var nataqForm = document.getElementById('nataq-form');
+if (nataqForm) {
+    nataqForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var text = document.getElementById('nataq-input').value.trim();
+        if (!text) { showError('nataq-error', 'لطفاً متن ورودی را وارد کنید'); return; }
+        showLoading('nataq-loading', 'nataq-results', 'nataq-error');
+        fetch('/nataq', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: text })
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            hideLoading('nataq-loading');
+            if (data.success) {
+                document.getElementById('processed-text').textContent = data.processed_text;
+                document.getElementById('nataq-results').classList.remove('d-none');
+            } else {
+                showError('nataq-error', data.error || 'خطا در پردازش');
             }
+        })
+        .catch(function(err) {
+            hideLoading('nataq-loading');
+            showError('nataq-error', 'خطا در ارتباط با سرور');
         });
     });
 }
 
-// تابع برای انیمیشن‌ها
-function initializeAnimations() {
-    // افزودن کلاس fade-in به عناصر اصلی
-    const elementsToAnimate = document.querySelectorAll('.card, .navbar, footer');
-    elementsToAnimate.forEach(element => {
-        element.classList.add('fade-in');
-    });
-}
-
-// تابع برای بررسی وضعیت سامانه
-function checkSystemStatus() {
-    // این تابع می‌تواند وضعیت سامانه را به صورت دوره‌ای چک کند
-    setInterval(() => {
-        const statusIndicators = document.querySelectorAll('.status-indicator');
-        statusIndicators.forEach(indicator => {
-            indicator.classList.toggle('pulse');
+// میزان‌رو
+var mizanroForm = document.getElementById('mizanro-form');
+if (mizanroForm) {
+    mizanroForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var text = document.getElementById('mizanro-input').value.trim();
+        if (!text) { showError('mizanro-error', 'لطفاً متن ورودی را وارد کنید'); return; }
+        showLoading('mizanro-loading', 'mizanro-results', 'mizanro-error');
+        fetch('/mizanro', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: text })
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            hideLoading('mizanro-loading');
+            if (data.success) {
+                var a = data.analysis;
+                document.getElementById('word-count').textContent = a.word_count;
+                document.getElementById('sentence-count').textContent = a.sentence_count;
+                document.getElementById('complexity-score').textContent = a.complexity_score;
+                document.getElementById('lexical-diversity').textContent = a.lexical_diversity;
+                document.getElementById('avg-sentence-length').textContent = a.avg_sentence_length;
+                document.getElementById('unique-words').textContent = a.unique_words;
+                document.getElementById('mizanro-results').classList.remove('d-none');
+            } else {
+                showError('mizanro-error', data.error || 'خطا در تحلیل');
+            }
+        })
+        .catch(function(err) {
+            hideLoading('mizanro-loading');
+            showError('mizanro-error', 'خطا در ارتباط با سرور');
         });
-    }, 3000);
-}
-
-// تابع برای نمایش نوتیفیکیشن
-function showNotification(message, type = 'info') {
-    const notificationContainer = document.getElementById('notification-container');
-    
-    if (!notificationContainer) {
-        createNotificationContainer();
-    }
-    
-    const alertClass = {
-        'success': 'alert-success',
-        'error': 'alert-danger',
-        'warning': 'alert-warning',
-        'info': 'alert-info'
-    }[type] || 'alert-info';
-    
-    const notificationId = 'notification-' + Date.now();
-    const notificationHTML = `
-        <div id="${notificationId}" class="alert ${alertClass} alert-dismissible fade show" role="alert">
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    `;
-    
-    notificationContainer.innerHTML += notificationHTML;
-    
-    // حذف خودکار نوتیفیکیشن بعد از 5 ثانیه
-    setTimeout(() => {
-        const notification = document.getElementById(notificationId);
-        if (notification) {
-            notification.remove();
-        }
-    }, 5000);
-}
-
-// تابع برای ایجاد کانتینر نوتیفیکیشن
-function createNotificationContainer() {
-    const container = document.createElement('div');
-    container.id = 'notification-container';
-    container.className = 'position-fixed top-0 end-0 p-3';
-    container.style.zIndex = '9999';
-    document.body.appendChild(container);
-}
-
-// تابع برای مدیریت آپلود فایل
-function handleFileUpload(inputElement, callback) {
-    const file = inputElement.files[0];
-    if (!file) return;
-    
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        callback(e.target.result, file.name);
-    };
-    reader.readAsText(file, 'UTF-8');
-}
-
-// تابع برای دانلود نتیجه
-function downloadResult(content, filename, contentType = 'text/plain') {
-    const blob = new Blob([content], { type: contentType });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-}
-
-// تابع برای کپی متن به کلیپ‌بورد
-function copyToClipboard(text) {
-    navigator.clipboard.writeText(text).then(() => {
-        showNotification('متن با موفقیت کپی شد', 'success');
-    }).catch(err => {
-        showNotification('خطا در کپی کردن متن', 'error');
     });
 }
 
-// تابع برای تحلیل متن
-function analyzeText(text, endpoint) {
-    return fetch(endpoint, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ text: text })
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('خطا در پاسخ سرور');
-        }
-        return response.json();
+// ضد چندپارگی
+var antiFragForm = document.getElementById('anti-frag-form');
+if (antiFragForm) {
+    antiFragForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var text = document.getElementById('anti-frag-input').value.trim();
+        if (!text) { showError('anti-frag-error', 'لطفاً متن ورودی را وارد کنید'); return; }
+        showLoading('anti-frag-loading', 'anti-frag-results', 'anti-frag-error');
+        fetch('/anti_fragmentation', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: text })
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            hideLoading('anti-frag-loading');
+            if (data.success) {
+                document.getElementById('optimized-text').textContent = data.processed_text;
+                document.getElementById('score-before').textContent = data.fragmentation_score_before;
+                document.getElementById('score-after').textContent = data.fragmentation_score_after;
+                document.getElementById('improvement-percent').textContent = data.improvement_percentage;
+                document.getElementById('anti-frag-results').classList.remove('d-none');
+            } else {
+                showError('anti-frag-error', data.error || 'خطا در پردازش');
+            }
+        })
+        .catch(function(err) {
+            hideLoading('anti-frag-loading');
+            showError('anti-frag-error', 'خطا در ارتباط با سرور');
+        });
     });
 }
 
-// تابع برای مدیریت خطاها
-function handleError(error, errorElement) {
-    console.error('Error:', error);
-    errorElement.textContent = error.message || 'خطای ناشناخته رخ داده است';
-    errorElement.classList.remove('d-none');
-}
-
-// پلاگین jQuery برای انیمیشن‌های سفارشی (اگر jQuery موجود باشد)
-if (typeof jQuery !== 'undefined') {
-    (function($) {
-        $.fn.fadeInUp = function(duration = 600) {
-            return this.each(function() {
-                $(this).css({
-                    'opacity': '0',
-                    'transform': 'translateY(20px)'
-                });
-                $(this).animate({
-                    'opacity': '1',
-                    'transform': 'translateY(0)'
-                }, duration);
-            });
-        };
-        
-        $.fn.pulse = function() {
-            return this.each(function() {
-                $(this).fadeTo(300, 0.5).fadeTo(300, 1);
-            });
-        };
-    })(jQuery);
-}
-
-// کلاس برای مدیریت وضعیت سامانه
-class SystemStatus {
-    constructor() {
-        this.isOnline = true;
-        this.lastCheck = null;
+// سلامت سرویس
+window.addEventListener('DOMContentLoaded', function() {
+    var healthDiv = document.getElementById('health-status');
+    if (healthDiv) {
+        fetch('/health')
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            healthDiv.innerHTML = '<span class="badge bg-success">✅ سرویس فعال است</span>';
+        })
+        .catch(function(err) {
+            healthDiv.innerHTML = '<span class="badge bg-danger">❌ خطا در اتصال</span>';
+        });
     }
-    
-    async checkStatus() {
-        try {
-            const response = await fetch('/api/health');
-            const data = await response.json();
-            this.isOnline = data.modules_loaded;
-            this.lastCheck = new Date();
-            return this.isOnline;
-        } catch (error) {
-            this.isOnline = false;
-            this.lastCheck = new Date();
-            return false;
-        }
-    }
-    
-    getStatusMessage() {
-        if (!this.lastCheck) {
-            return 'در حال بررسی وضعیت...';
-        }
-        
-        return this.isOnline ? 
-            'سامانه در دسترس است' : 
-            'مشکل در اتصال به سامانه';
-    }
-}
-
-// ایجاد نمونه از کلاس وضعیت سامانه
-const systemStatus = new SystemStatus();
-
-// صادر کردن توابع برای استفاده در ماژول‌های دیگر
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = {
-        showNotification,
-        handleFileUpload,
-        downloadResult,
-        copyToClipboard,
-        analyzeText,
-        handleError,
-        systemStatus
-    };
-}
+});

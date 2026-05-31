@@ -104,3 +104,6 @@ Thumbs.db
 # Local development
 .local/
 __pycache__/
+__pycache__/
+*.pyc
+algorithm_backups/
