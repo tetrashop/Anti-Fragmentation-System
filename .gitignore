@@ -107,3 +107,5 @@ __pycache__/
 __pycache__/
 *.pyc
 algorithm_backups/
+.vercel
+.env*
