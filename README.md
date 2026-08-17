@@ -78,3 +78,8 @@ MIT License
   <sub>ساخته شده با ❤️ توسط تیم TetraShop</sub>
 </div>
 <!-- Trigger deploy: Mon Aug 17 01:47:23 +0330 2026 -->
+
+## 🌐 دیپلوی
+
+- **URL:** [https://Anti-Fragmentation-System.vercel.app](https://Anti-Fragmentation-System.vercel.app)
+- **وضعیت:** ✅ فعال
