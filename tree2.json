@@ -1,0 +1,143 @@
+{
+  "root": {
+    "id": "0.0",
+    "branches": {
+      "4.0": {
+        "leaves": [
+          {
+            "name": "-----",
+            "url": "https://github.com/tetrashop/-----"
+          },
+          {
+            "name": "chess-engine",
+            "url": "https://github.com/tetrashop/chess-engine"
+          },
+          {
+            "name": "ChessEngine",
+            "url": "https://github.com/tetrashop/ChessEngine"
+          },
+          {
+            "name": "Eraser",
+            "url": "https://github.com/tetrashop/Eraser"
+          },
+          {
+            "name": "info",
+            "url": "https://github.com/tetrashop/info"
+          }
+        ]
+      },
+      "2.0": {
+        "leaves": [
+          {
+            "name": "2d-to-3d-converter",
+            "url": "https://github.com/tetrashop/2d-to-3d-converter"
+          },
+          {
+            "name": "3d-conversion-app",
+            "url": "https://github.com/tetrashop/3d-conversion-app"
+          },
+          {
+            "name": "3d-islamic-converter",
+            "url": "https://github.com/tetrashop/3d-islamic-converter"
+          },
+          {
+            "name": "3d-simple-app",
+            "url": "https://github.com/tetrashop/3d-simple-app"
+          },
+          {
+            "name": "bale_3d_bot",
+            "url": "https://github.com/tetrashop/bale_3d_bot"
+          },
+          {
+            "name": "ChessExternalUIRefrergitzUnityWithSelfAI2020",
+            "url": "https://github.com/tetrashop/ChessExternalUIRefrergitzUnityWithSelfAI2020"
+          },
+          {
+            "name": "cygl",
+            "url": "https://github.com/tetrashop/cygl"
+          },
+          {
+            "name": "final-3d-business",
+            "url": "https://github.com/tetrashop/final-3d-business"
+          },
+          {
+            "name": "Fotball-tetrashop",
+            "url": "https://github.com/tetrashop/Fotball-tetrashop"
+          },
+          {
+            "name": "gltools",
+            "url": "https://github.com/tetrashop/gltools"
+          },
+          {
+            "name": "img3d",
+            "url": "https://github.com/tetrashop/img3d"
+          }
+        ]
+      },
+      "3.0": {
+        "leaves": [
+          {
+            "name": "advanced-management-system",
+            "url": "https://github.com/tetrashop/advanced-management-system"
+          },
+          {
+            "name": "advanced-managment-system",
+            "url": "https://github.com/tetrashop/advanced-managment-system"
+          },
+          {
+            "name": "Anti-Fragmentation-System",
+            "url": "https://github.com/tetrashop/Anti-Fragmentation-System"
+          },
+          {
+            "name": "API-Server-Template",
+            "url": "https://github.com/tetrashop/API-Server-Template"
+          },
+          {
+            "name": "complete-project",
+            "url": "https://github.com/tetrashop/complete-project"
+          },
+          {
+            "name": "Flask-Web-Boilerplate",
+            "url": "https://github.com/tetrashop/Flask-Web-Boilerplate"
+          },
+          {
+            "name": "HybridizerRefrigitz2",
+            "url": "https://github.com/tetrashop/HybridizerRefrigitz2"
+          },
+          {
+            "name": "integrated-system",
+            "url": "https://github.com/tetrashop/integrated-system"
+          }
+        ]
+      },
+      "1.0": {
+        "leaves": [
+          {
+            "name": "CSharpVideoDemo",
+            "url": "https://github.com/tetrashop/CSharpVideoDemo"
+          },
+          {
+            "name": "Data-Processing-Pipeline",
+            "url": "https://github.com/tetrashop/Data-Processing-Pipeline"
+          },
+          {
+            "name": "EmotionLib",
+            "url": "https://github.com/tetrashop/EmotionLib"
+          },
+          {
+            "name": "EmotionPlayer",
+            "url": "https://github.com/tetrashop/EmotionPlayer"
+          },
+          {
+            "name": "FormulaPy",
+            "url": "https://github.com/tetrashop/FormulaPy"
+          },
+          {
+            "name": "intelligent-writer",
+            "url": "https://github.com/tetrashop/intelligent-writer"
+          }
+        ]
+      }
+    }
+  }
+}
