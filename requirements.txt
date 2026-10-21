@@ -1,6 +1,2 @@
 Flask==2.3.3
-requests
-pyyaml
-sentence-transformers
-scikit-learn
-numpy
+gunicorn==20.1.0
