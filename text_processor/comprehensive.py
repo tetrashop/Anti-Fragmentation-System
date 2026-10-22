@@ -1,17 +1,14 @@
-from .nataq import NataqProcessor
-from .mizanro import MizanroAnalyzer
+~/Anti-Fragmentation-System $ cat ~/Anti-Fragmentation-System/text_processor/comprehensive.py
+from .nataq import NataqProcessor                              from .mizanro import MizanroAnalyzer
 from .anti_frag import AntiFragmentation
-from .summarizer import Summarizer
-from .keywords import KeywordExtractor
+from .summarizer import Summarizer                             from .keywords import KeywordExtractor
 from .readability import ReadabilityAnalyzer
 from .sentiment import SentimentAnalyzer
 from .grammar import GrammarChecker
 from .stats import StatsAnalyzer
 
-class ComprehensiveAnalyzer:
-    """تحلیل جامع متن - همه ماژول‌ها در یک عبور"""
-    def __init__(self, max_length=None):
-        self.nataq = NataqProcessor(max_length=max_length)
+class ComprehensiveAnalyzer:                                       """تحلیل جامع متن - همه ماژول‌ها در یک عبور"""
+    def __init__(self, max_length=None):                               self.nataq = NataqProcessor(max_length=max_length)
         self.mizanro = MizanroAnalyzer()
         self.anti_frag = AntiFragmentation()
         self.summarizer = Summarizer()
@@ -61,3 +58,4 @@ class ComprehensiveAnalyzer:
                 "exceeded": wc > self.max_length
             }
         return result
+~/Anti-Fragmentation-System
