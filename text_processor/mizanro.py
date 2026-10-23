@@ -1,43 +1,33 @@
+import re
+
 class MizanroAnalyzer:
-    def __init__(self):
-        self.loaded = True
-    
     def analyze(self, text):
-        try:
-            words = text.split()
-            sentences = [s for s in text.split('.') if s.strip()]
-            
-            word_count = len(words)
-            sentence_count = len(sentences)
-            unique_words = len(set(words))
-            
-            if sentence_count > 0:
-                avg_sentence_length = word_count / sentence_count
-                lexical_diversity = unique_words / word_count if word_count > 0 else 0
-            else:
-                avg_sentence_length = 0
-                lexical_diversity = 0
-            
-            complexity_score = min(100, int((avg_sentence_length * 3) + (lexical_diversity * 40)))
-            
-            analysis = {
+        if not text:
+            return {'success': False, 'error': 'متن خالی است'}
+
+        words = text.split()
+        word_count = len(words)
+        char_count = len(text)
+
+        # تقسیم جملات
+        sentences = re.split(r'[.!؟…]+', text)
+        sentences = [s for s in sentences if s.strip()]
+        sentence_count = len(sentences)
+
+        unique_words = len(set(words))
+        avg_sentence_length = word_count / sentence_count if sentence_count else 0
+        lexical_diversity = unique_words / word_count if word_count else 0
+        score = min(100, word_count * 3 + char_count // 10)
+
+        return {
+            'success': True,
+            'analysis': {
                 'word_count': word_count,
+                'char_count': char_count,
                 'sentence_count': sentence_count,
                 'unique_words': unique_words,
                 'avg_sentence_length': round(avg_sentence_length, 2),
-                'lexical_diversity': round(lexical_diversity, 3),
-                'complexity_score': complexity_score
+                'lexical_diversity': round(lexical_diversity, 2),
+                'complexity_score': score
             }
-            
-            return {
-                'success': True,
-                'analysis': analysis
-            }
-        except Exception as e:
-            return {
-                'success': False,
-                'error': str(e),
-                'analysis': {}
-            }
-
-mizanro_analyzer = MizanroAnalyzer()
+        }
