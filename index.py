@@ -39,15 +39,6 @@ INDEX_HTML = "<!DOCTYPE html><html lang='fa' dir='rtl'><head><title>سامانه
 <div class='col-md-3 mb-3'><div class='card'><div class='card-header bg-warning'>🔄 ضد چندپارگی</div><div class='card-body'><p>بهینه‌سازی</p><a href='/anti_fragmentation' class='btn btn-warning w-100'>ورود</a></div></div></div>
 <div class='col-md-3 mb-3'><div class='card'><div class='card-header bg-success text-white'>🔍 تحلیل جامع</div><div class='card-body'><p>۱۲ ماژول</p><a href='/analyze' class='btn btn-success w-100'>ورود</a></div></div></div>
 </div>
-<div class='row mt-4'><div class='col-12'><div class='card'><div class='card-header bg-dark text-white'>🔌 APIهای جدید (POST JSON)</div><div class='card-body'>
-<code>POST /sentiment</code> → تحلیل احساسات<br>
-<code>POST /similarity</code> → شباهت دو متن<br>
-<code>POST /grammar</code> → بررسی دستوری<br>
-<code>POST /stats</code> → آمار پیشرفته<br>
-<code>POST /batch</code> → پردازش دسته‌ای<br>
-<code>POST /export/json|md|csv|txt</code> → دانلود<br>
-<code>GET /history</code> → تاریخچه
-</div></div></div></div>
 </main>""" + FOOTER + "</body></html>"
 
 NATAQ_HTML = "<!DOCTYPE html><html lang='fa' dir='rtl'><head><title>نطق</title>" + HEAD + "</head><body>" + NAV + """
@@ -102,18 +93,10 @@ ANALYZE_HTML = "<!DOCTYPE html><html lang='fa' dir='rtl'><head><title>تحلیل
 <div class='card mb-3'><div class='card-header bg-danger text-white'>💭 احساسات</div><div class='card-body' id='senti'></div></div>
 <div class='card mb-3'><div class='card-header bg-dark text-white'>🔑 کلیدواژه</div><div class='card-body' id='kw'></div></div>
 <div class='card mb-3'><div class='card-header bg-secondary text-white'>📄 خلاصه</div><div class='card-body'><p id='sum' class='bg-light p-3 rounded'></p><small id='sumMeta' class='text-muted'></small></div></div>
-<div class='card mb-3'><div class='card-header bg-primary text-white'>📥 دانلود</div><div class='card-body'>
-<button class='btn btn-sm btn-outline-primary' onclick='doExport(\"json\")'>JSON</button>
-<button class='btn btn-sm btn-outline-success' onclick='doExport(\"md\")'>Markdown</button>
-<button class='btn btn-sm btn-outline-info' onclick='doExport(\"csv\")'>CSV</button>
-<button class='btn btn-sm btn-outline-secondary' onclick='doExport(\"txt\")'>TXT</button>
-</div></div>
 </div></div></div></main>
 <script>
-let lastText='';
 document.getElementById('useLimit').onchange=function(){document.getElementById('maxLen').disabled=!this.checked;};
-document.getElementById('btn').onclick=async()=>{const t=document.getElementById('in').value.trim(),e=document.getElementById('err'),l=document.getElementById('ld'),r=document.getElementById('res');if(!t){e.textContent='متن وارد کنید';e.classList.remove('d-none');return;}e.classList.add('d-none');r.classList.add('d-none');l.classList.remove('d-none');lastText=t;const p={text:t};if(document.getElementById('useLimit').checked)p.max_length=parseInt(document.getElementById('maxLen').value)||250;try{const res=await fetch('/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p)});const d=await res.json();l.classList.add('d-none');if(!d.success){e.textContent=d.error||'خطا';e.classList.remove('d-none');return;}const s=d.stats;document.getElementById('stats').innerHTML=`<div class='stat-box'>📝 کلمات: <b>${s.word_count}</b></div><div class='stat-box'>📄 جملات: <b>${s.sentence_count}</b></div><div class='stat-box'>🔤 کاراکترها: <b>${s.char_count}</b></div>`+(d.limit?`<div class='stat-box'>⏱ باقی: <b>${d.limit.remaining}</b></div>`:'');document.getElementById('cleaned').textContent=d.cleaned_text;const rr=d.readability;document.getElementById('read').innerHTML=`<div class='stat-box'><b>خوانایی: ${rr.readability_score}/100</b> - ${rr.level}<div class='score-bar mt-2'><div class='score-fill' style='width:${rr.readability_score}%'></div></div></div>`;const se=d.sentiment;document.getElementById('senti').innerHTML=`<div class='stat-box'><b>احساس: ${se.label}</b> (امتیاز: ${se.score})<br>مثبت: ${se.positive_count} | منفی: ${se.negative_count}</div>`;document.getElementById('kw').innerHTML=d.keywords.map(k=>`<span class='kw-tag'>${k.word} (${k.frequency})</span>`).join('')||'<em>یافت نشد</em>';document.getElementById('sum').textContent=d.summary;document.getElementById('sumMeta').textContent='فشرده‌سازی: '+Math.round((1-d.summary.length/d.cleaned_text.length)*100)+'%';r.classList.remove('d-none');}catch(x){l.classList.add('d-none');e.textContent='خطا: '+x.message;e.classList.remove('d-none');}};
-async function doExport(fmt){if(!lastText){alert('اول تحلیل کنید');return;}const r=await fetch('/export/'+fmt,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:lastText})});const blob=await r.blob();const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='analyze.'+fmt;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);}
+document.getElementById('btn').onclick=async()=>{const t=document.getElementById('in').value.trim(),e=document.getElementById('err'),l=document.getElementById('ld'),r=document.getElementById('res');if(!t){e.textContent='متن وارد کنید';e.classList.remove('d-none');return;}e.classList.add('d-none');r.classList.add('d-none');l.classList.remove('d-none');const p={text:t};if(document.getElementById('useLimit').checked)p.max_length=parseInt(document.getElementById('maxLen').value)||250;try{const res=await fetch('/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p)});const d=await res.json();l.classList.add('d-none');if(!d.success){e.textContent=(d.error||'خطا')+(d.details?' - '+d.details:'');e.classList.remove('d-none');return;}const s=d.stats;document.getElementById('stats').innerHTML=`<div class='stat-box'>📝 کلمات: <b>${s.word_count}</b></div><div class='stat-box'>📄 جملات: <b>${s.sentence_count}</b></div><div class='stat-box'>🔤 کاراکترها: <b>${s.char_count}</b></div>`+(d.limit?`<div class='stat-box'>⏱ باقی: <b>${d.limit.remaining}</b></div>`:'');document.getElementById('cleaned').textContent=d.cleaned_text;const rr=d.readability;document.getElementById('read').innerHTML=`<div class='stat-box'><b>خوانایی: ${rr.readability_score}/100</b> - ${rr.level}<div class='score-bar mt-2'><div class='score-fill' style='width:${rr.readability_score}%'></div></div></div>`;const se=d.sentiment;document.getElementById('senti').innerHTML=`<div class='stat-box'><b>احساس: ${se.label}</b> (امتیاز: ${se.score})<br>مثبت: ${se.positive_count} | منفی: ${se.negative_count}</div>`;document.getElementById('kw').innerHTML=d.keywords.map(k=>`<span class='kw-tag'>${k.word} (${k.frequency})</span>`).join('')||'<em>یافت نشد</em>';document.getElementById('sum').textContent=d.summary;document.getElementById('sumMeta').textContent='فشرده‌سازی: '+Math.round((1-d.summary.length/d.cleaned_text.length)*100)+'%';r.classList.remove('d-none');}catch(x){l.classList.add('d-none');e.textContent='خطا: '+x.message;e.classList.remove('d-none');}};
 </script>""" + FOOTER + "</body></html>"
 
 @app.route('/')
@@ -135,8 +118,11 @@ def nataq():
     if request.method == 'POST':
         d = request.get_json()
         if not d or 'text' not in d: return jsonify({'error': 'Bad Request'}), 400
-        from text_processor.nataq import NataqProcessor
-        return jsonify({'success': True, 'processed_text': NataqProcessor().process(d['text'])})
+        try:
+            from text_processor.nataq import NataqProcessor
+            return jsonify({'success': True, 'processed_text': NataqProcessor().process(d['text'])})
+        except Exception as e:
+            return jsonify({'error': 'Internal Server Error', 'details': str(e)}), 500
     return render_template_string(NATAQ_HTML)
 
 @app.route('/mizanro', methods=['GET', 'POST'])
@@ -144,8 +130,11 @@ def mizanro():
     if request.method == 'POST':
         d = request.get_json()
         if not d or 'text' not in d: return jsonify({'error': 'Bad Request'}), 400
-        from text_processor.mizanro import MizanroAnalyzer
-        return jsonify(MizanroAnalyzer().analyze(d['text']))
+        try:
+            from text_processor.mizanro import MizanroAnalyzer
+            return jsonify(MizanroAnalyzer().analyze(d['text']))
+        except Exception as e:
+            return jsonify({'error': 'Internal Server Error', 'details': str(e)}), 500
     return render_template_string(MIZANRO_HTML)
 
 @app.route('/anti_fragmentation', methods=['GET', 'POST'])
@@ -153,14 +142,17 @@ def anti_fragmentation():
     if request.method == 'POST':
         d = request.get_json()
         if not d or 'text' not in d: return jsonify({'error': 'Bad Request'}), 400
-        from text_processor.anti_frag import AntiFragmentation
-        p = AntiFragmentation()
-        rd = p.process(d['text'])
-        pt = rd['processed_text'] if isinstance(rd, dict) else rd
-        sb = p._calculate_fragmentation(d['text']); sa = p._calculate_fragmentation(pt)
-        return jsonify({'success': True, 'original_text': d['text'], 'processed_text': pt,
-                        'fragmentation_score_before': sb, 'fragmentation_score_after': sa,
-                        'improvement_percentage': round((1-sa/sb)*100, 2) if sb else 100})
+        try:
+            from text_processor.anti_frag import AntiFragmentation
+            p = AntiFragmentation()
+            rd = p.process(d['text'])
+            pt = rd['processed_text'] if isinstance(rd, dict) else rd
+            sb = p._calculate_fragmentation(d['text']); sa = p._calculate_fragmentation(pt)
+            return jsonify({'success': True, 'original_text': d['text'], 'processed_text': pt,
+                            'fragmentation_score_before': sb, 'fragmentation_score_after': sa,
+                            'improvement_percentage': round((1-sa/sb)*100, 2) if sb else 100})
+        except Exception as e:
+            return jsonify({'error': 'Internal Server Error', 'details': str(e)}), 500
     return render_template_string(ANTI_HTML)
 
 @app.route('/analyze', methods=['GET', 'POST'])
@@ -187,54 +179,71 @@ def analyze_all():
 def sentiment():
     d = request.get_json()
     if not d or 'text' not in d: return jsonify({'error': 'Bad Request'}), 400
-    from text_processor.sentiment import SentimentAnalyzer
-    return jsonify(SentimentAnalyzer().analyze(d['text']))
+    try:
+        from text_processor.sentiment import SentimentAnalyzer
+        return jsonify(SentimentAnalyzer().analyze(d['text']))
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/similarity', methods=['POST'])
 def similarity():
     d = request.get_json()
     if not d or 'text1' not in d or 'text2' not in d: return jsonify({'error': 'text1 و text2 الزامی'}), 400
-    from text_processor.similarity import SimilarityAnalyzer
-    return jsonify(SimilarityAnalyzer().compare(d['text1'], d['text2']))
+    try:
+        from text_processor.similarity import SimilarityAnalyzer
+        return jsonify(SimilarityAnalyzer().compare(d['text1'], d['text2']))
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/grammar', methods=['POST'])
 def grammar():
     d = request.get_json()
     if not d or 'text' not in d: return jsonify({'error': 'Bad Request'}), 400
-    from text_processor.grammar import GrammarChecker
-    return jsonify(GrammarChecker().check(d['text']))
+    try:
+        from text_processor.grammar import GrammarChecker
+        return jsonify(GrammarChecker().check(d['text']))
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/stats', methods=['POST'])
 def stats():
     d = request.get_json()
     if not d or 'text' not in d: return jsonify({'error': 'Bad Request'}), 400
-    from text_processor.stats import StatsAnalyzer
-    return jsonify(StatsAnalyzer().analyze(d['text']))
+    try:
+        from text_processor.stats import StatsAnalyzer
+        return jsonify(StatsAnalyzer().analyze(d['text']))
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/batch', methods=['POST'])
 def batch():
     d = request.get_json()
     if not d or 'texts' not in d: return jsonify({'error': 'texts الزامی'}), 400
-    from text_processor.batch import BatchProcessor
-    return jsonify(BatchProcessor(max_length=d.get('max_length')).process(d['texts']))
+    try:
+        from text_processor.batch import BatchProcessor
+        return jsonify(BatchProcessor(max_length=d.get('max_length')).process(d['texts']))
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/export/<fmt>', methods=['POST'])
 def export(fmt):
     if fmt not in ('json', 'md', 'csv', 'txt'): return jsonify({'error': 'فرمت نامعتبر'}), 400
     d = request.get_json()
     if not d or 'text' not in d: return jsonify({'error': 'Bad Request'}), 400
-    from text_processor.comprehensive import ComprehensiveAnalyzer
-    from text_processor.exporter import Exporter
-    r = ComprehensiveAnalyzer().analyze(d['text'])
-    e = Exporter()
-    content, mime = {
-        'json': (e.to_json(r), 'application/json; charset=utf-8'),
-        'md': (e.to_markdown(r), 'text/markdown; charset=utf-8'),
-        'csv': (e.to_csv(r), 'text/csv; charset=utf-8'),
-        'txt': (e.to_txt(r), 'text/plain; charset=utf-8')
-    }[fmt]
-    return Response(content, mimetype=mime,
-                    headers={'Content-Disposition': f'attachment; filename=analysis.{fmt}'})
+    try:
+        from text_processor.comprehensive import ComprehensiveAnalyzer
+        from text_processor.exporter import Exporter
+        r = ComprehensiveAnalyzer().analyze(d['text'])
+        e = Exporter()
+        content, mime = {
+            'json': (e.to_json(r), 'application/json; charset=utf-8'),
+            'md': (e.to_markdown(r), 'text/markdown; charset=utf-8'),
+            'csv': (e.to_csv(r), 'text/csv; charset=utf-8'),
+            'txt': (e.to_txt(r), 'text/plain; charset=utf-8')
+        }[fmt]
+        return Response(content, mimetype=mime, headers={'Content-Disposition': f'attachment; filename=analysis.{fmt}'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/history', methods=['GET'])
 def history_list():
@@ -247,8 +256,11 @@ def history_list():
 @app.route('/history/<int:hid>', methods=['GET'])
 def history_get(hid):
     if not history: return jsonify({'error': 'تاریخچه غیرفعال'}), 503
-    r = history.get(hid)
-    return Response(r, mimetype='application/json') if r else (jsonify({'error': 'یافت نشد'}), 404)
+    try:
+        r = history.get(hid)
+        return Response(r, mimetype='application/json') if r else (jsonify({'error': 'یافت نشد'}), 404)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.after_request
 def add_cors(response):
