@@ -9,7 +9,7 @@ from .grammar import GrammarChecker
 from .stats import StatsAnalyzer
 
 class ComprehensiveAnalyzer:
-    """تحلیل جامع متن - همه ماژول‌ها در یک عبور"""
+    """تحلیل جامع متن - همه ماژول‌ها با مدیریت خطای مستقل"""
     def __init__(self, max_length=None):
         self.nataq = NataqProcessor(max_length=max_length)
         self.mizanro = MizanroAnalyzer()
@@ -23,52 +23,91 @@ class ComprehensiveAnalyzer:
         self.max_length = max_length
 
     def analyze(self, text):
-        if not text:
-            return {"error": "متن ورودی خالی است"}
-        
+        if not text or not isinstance(text, str):
+            return {"error": "متن ورودی نامعتبر است"}
+
         # ۱. اصلاح نویسه‌ها و نیم‌فاصله
-        corrected = self.nataq.process(text)
-        
+        try:
+            corrected = self.nataq.process(text)
+        except Exception:
+            corrected = text
+            
         # ۲. کاهش چندپارگی
-        frag_result = self.anti_frag.process(corrected)
-        cleaned = frag_result['processed_text'] if isinstance(frag_result, dict) else frag_result
-        
+        try:
+            frag_result = self.anti_frag.process(corrected)
+            cleaned = frag_result['processed_text'] if isinstance(frag_result, dict) else frag_result
+        except Exception:
+            cleaned = corrected
+            
         # ۳. اصلاح دستوری
-        grammar_result = self.grammar.check(cleaned)
-        final_clean = grammar_result.get('fixed_text', cleaned)
-        
-        # ۴. تحلیل‌های موازی
-        quality = self.mizanro.analyze(final_clean)
-        readable = self.readability.analyze(final_clean)
-        kws = self.keywords.extract(final_clean)
-        summary = self.summarizer.summarize(final_clean)
-        senti = self.sentiment.analyze(final_clean)
-        stats = self.stats_analyzer.analyze(final_clean)
-        
+        try:
+            grammar_result = self.grammar.check(cleaned)
+            final_clean = grammar_result.get('fixed_text', cleaned)
+        except Exception:
+            grammar_result = {"has_issues": False, "fixed_text": cleaned}
+            final_clean = cleaned
+
+        # ۴. تحلیل‌های موازی (هر بخش مستقل، در صورت خطا سیستم کرش نمی‌کند)
+        try:
+            quality = self.mizanro.analyze(final_clean)
+            quality_data = quality.get('analysis', quality) if isinstance(quality, dict) else quality
+        except Exception:
+            quality_data = {}
+
+        try:
+            readable = self.readability.analyze(final_clean)
+        except Exception:
+            readable = {}
+
+        try:
+            kws = self.keywords.extract(final_clean)
+            keywords_data = kws.get('keywords', []) if isinstance(kws, dict) else []
+        except Exception:
+            keywords_data = []
+
+        try:
+            summary = self.summarizer.summarize(final_clean)
+            summary_text = summary.get('summary', '') if isinstance(summary, dict) else str(summary)
+        except Exception:
+            summary_text = ""
+
+        try:
+            senti = self.sentiment.analyze(final_clean)
+        except Exception:
+            senti = {"label": "نامشخص", "score": 0}
+
+        try:
+            stats = self.stats_analyzer.analyze(final_clean)
+        except Exception:
+            stats = {}
+
+        # طول متن
         wc = len(final_clean.split())
+        sentence_count = readable.get('total_sentences', 0) if isinstance(readable, dict) else 0
+
         result = {
             "success": True,
             "original_text": text,
             "cleaned_text": final_clean,
-            "quality": quality.get('analysis', quality),
+            "quality": quality_data,
             "readability": readable,
-            "keywords": kws.get('keywords', []),
-            "summary": summary.get('summary', ''),
+            "keywords": keywords_data,
+            "summary": summary_text,
             "sentiment": senti,
             "grammar": grammar_result,
             "stats": {
                 "word_count": wc,
                 "char_count": len(final_clean),
-                "sentence_count": readable.get('total_sentences', 0)
+                "sentence_count": sentence_count
             },
             "detailed_stats": stats
         }
-        
+
         if self.max_length:
             result['limit'] = {
                 "max": self.max_length,
                 "remaining": self.max_length - wc,
                 "exceeded": wc > self.max_length
             }
-        
+
         return result
